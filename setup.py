@@ -16,7 +16,7 @@ entry_points = {
 
 setup(
     name = "rcs-latexdiff",
-    version = "1.0",
+    version = "1.0.1",
     url = 'https://github.com/driquet/rcs-latexdiff',
     author = 'Damien Riquet',
     author_email = 'd.riquet@gmail.com',

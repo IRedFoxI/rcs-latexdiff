@@ -6,7 +6,6 @@ import os
 from rcs_latexdiff.rcs import get_rcs_class
 from rcs_latexdiff.utils import run_command, write_file
 
-
 logger = logging.getLogger("rcs-latexdiff")
 
 def get_file(rcs, root_path, relative_path, commit, filename):
@@ -67,7 +66,7 @@ def exec_diff(old_filename, new_filename, diff_filename):
 
     """
     run_command("latexdiff %s %s > %s" % (old_filename, new_filename, diff_filename))
-        
+
 
 
 def make_diff(rcs, old_commit, new_commit, root_path, relative_path, src_filename, dst_filename):
@@ -128,7 +127,7 @@ def parse_arguments():
 
     parser.add_argument('-D', '--debug', action='store_const',
         const=logging.DEBUG, dest='verbosity',
-        help='Show all message, including debug messages.')    
+        help='Show all message, including debug messages.')
 
     parser.add_argument('FILE', help='File to be compared.')
 
@@ -150,11 +149,11 @@ def init_logger(verbosity):
 
     if verbosity:
         logger.setLevel(verbosity)
-    
+
 
 def clean_output_files(files):
     """ Clean temporary files generated for the diff tool
-        
+
         :param files: files to be removed
 
     """
@@ -180,7 +179,7 @@ You can install it as follows:
 """
         exit(1)
 
-    
+
 
 
 def main():
@@ -214,6 +213,18 @@ def main():
     if args.clean:
         clean_output_files(generated_files[1:])
 
+    # Generate the PDF and show it
+    texfile = generated_files[0]
+    run_command("pdflatex -interaction nonstopmode %s" % (texfile))
+    auxfile = os.path.splitext(generated_files[0])[0] + ".aux"
+    if os.path.isfile(auxfile):
+        run_command("bibtex %s" % (texfile))
+        run_command("bibtex %s" % (auxfile))
+    run_command("pdflatex -interaction nonstopmode %s" % (texfile))
+    run_command("pdflatex -interaction nonstopmode %s" % (texfile))
+    pdffile = os.path.splitext(generated_files[0])[0] + ".pdf"
+    if os.path.isfile(pdffile):
+        run_command("xdg-open %s" % (pdffile))
 
 if __name__ == '__main__':
     main()
