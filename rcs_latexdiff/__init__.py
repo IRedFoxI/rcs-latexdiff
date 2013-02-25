@@ -213,18 +213,23 @@ def main():
     if args.clean:
         clean_output_files(generated_files[1:])
 
-    # Generate the PDF and show it
+    # Generate the PDF and show it if pdflatex and xdg-open installed
     texfile = generated_files[0]
-    run_command("pdflatex -interaction nonstopmode %s" % (texfile))
-    auxfile = os.path.splitext(generated_files[0])[0] + ".aux"
-    if os.path.isfile(auxfile):
-        run_command("bibtex %s" % (texfile))
-        run_command("bibtex %s" % (auxfile))
-    run_command("pdflatex -interaction nonstopmode %s" % (texfile))
-    run_command("pdflatex -interaction nonstopmode %s" % (texfile))
-    pdffile = os.path.splitext(generated_files[0])[0] + ".pdf"
-    if os.path.isfile(pdffile):
-        run_command("xdg-open %s" % (pdffile))
+    check_pdflatex = "which pdflatex"
+    ret, output = run_command(check_pdflatex)
+    if not ret:
+        run_command("pdflatex -interaction nonstopmode %s" % (texfile))
+        auxfile = os.path.splitext(generated_files[0])[0] + ".aux"
+        if os.path.isfile(auxfile):
+            run_command("bibtex %s" % (texfile))
+            run_command("bibtex %s" % (auxfile))
+        run_command("pdflatex -interaction nonstopmode %s" % (texfile))
+        run_command("pdflatex -interaction nonstopmode %s" % (texfile))
+        pdffile = os.path.splitext(generated_files[0])[0] + ".pdf"
+        check_xdgopen = "which xdg-open"
+        ret, output = run_command(check_xdgopen)
+        if os.path.isfile(pdffile) and not ret:
+            run_command("xdg-open %s" % (pdffile))
 
 if __name__ == '__main__':
     main()
